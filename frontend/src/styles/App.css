@@ -1,0 +1,19 @@
+.app {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+.app__main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
