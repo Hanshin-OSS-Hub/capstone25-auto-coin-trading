@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Header } from './components/layout/Header';
-import { Navigation } from './components/layout/Navigation';
-import { Dashboard } from './pages/Dashboard';
-import { Opportunities } from './pages/Opportunities';
-import { Trades } from './pages/Trades';
-import { Settings } from './pages/Settings';
-import { marketService } from './services/marketService';
-import { settingsService } from './services/settingsService';
-import './styles/App.css';
+import React, { useState, useEffect } from "react";
+import { Header } from "./components/layout/Header";
+import { Navigation } from "./components/layout/Navigation";
+import { Dashboard } from "./pages/Dashboard";
+import { Opportunities } from "./pages/Opportunities";
+import { Trades } from "./pages/Trades";
+import { Settings } from "./pages/Settings";
+import { marketService } from "./services/marketService";
+import { settingsService } from "./services/settingsService";
+import "./styles/App.css";
+
+import CandlestickChart from "./components/chart/CandlestickChart"; //줄 추가*************
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [prices, setPrices] = useState([]);
   const [opportunities, setOpportunities] = useState([]);
   const [isAutoTrading, setIsAutoTrading] = useState(false);
@@ -24,7 +26,7 @@ function App() {
       setPrices(data);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Failed to fetch prices:', error);
+      console.error("Failed to fetch prices:", error);
       // 에러 발생시 목업 데이터 사용
       setPrices(generateMockPrices());
     }
@@ -36,7 +38,7 @@ function App() {
       const data = await marketService.getArbitrageOpportunities();
       setOpportunities(data);
     } catch (error) {
-      console.error('Failed to fetch opportunities:', error);
+      console.error("Failed to fetch opportunities:", error);
       // 에러 발생시 목업 데이터 사용
       setOpportunities(generateMockOpportunities());
     }
@@ -48,7 +50,7 @@ function App() {
       const status = await settingsService.getAutoTradingStatus();
       setIsAutoTrading(status.enabled);
     } catch (error) {
-      console.error('Failed to check auto trading status:', error);
+      console.error("Failed to check auto trading status:", error);
     }
   };
 
@@ -59,7 +61,7 @@ function App() {
       await Promise.all([
         fetchPrices(),
         fetchOpportunities(),
-        checkAutoTradingStatus()
+        checkAutoTradingStatus(),
       ]);
       setLoading(false);
     };
@@ -86,8 +88,8 @@ function App() {
       await settingsService.toggleAutoTrading(newStatus);
       setIsAutoTrading(newStatus);
     } catch (error) {
-      console.error('Failed to toggle auto trading:', error);
-      alert('자동거래 설정 변경에 실패했습니다.');
+      console.error("Failed to toggle auto trading:", error);
+      alert("자동거래 설정 변경에 실패했습니다.");
     }
   };
 
@@ -97,13 +99,15 @@ function App() {
     }
 
     switch (activeTab) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard prices={prices} />;
-      case 'opportunities':
+      case "opportunities":
         return <Opportunities opportunities={opportunities} />;
-      case 'trades':
+      case "chart": //줄 추가*************
+        return <CandlestickChart />;
+      case "trades":
         return <Trades />;
-      case 'settings':
+      case "settings":
         return <Settings />;
       default:
         return <Dashboard prices={prices} />;
@@ -126,21 +130,28 @@ function App() {
 
 // 목업 데이터 생성 함수들
 const generateMockPrices = () => {
-  const coins = ['BTC', 'ETH', 'XRP', 'SOL'];
+  const coins = ["BTC", "ETH", "XRP", "SOL"];
   const baseExchangeRate = 1330;
-  
-  return coins.map(coin => {
-    const usPrice = coin === 'BTC' ? 103000 : coin === 'ETH' ? 3500 : coin === 'SOL' ? 180 : 0.58;
+
+  return coins.map((coin) => {
+    const usPrice =
+      coin === "BTC"
+        ? 103000
+        : coin === "ETH"
+        ? 3500
+        : coin === "SOL"
+        ? 180
+        : 0.58;
     const convertedPrice = usPrice * baseExchangeRate;
     const domesticPrice = convertedPrice * (1 + (Math.random() * 0.04 - 0.01));
-    const premium = ((domesticPrice - convertedPrice) / convertedPrice * 100);
-    
+    const premium = ((domesticPrice - convertedPrice) / convertedPrice) * 100;
+
     return {
       coin,
       domesticPrice: Math.round(domesticPrice),
       usPrice,
       convertedPrice: Math.round(convertedPrice),
-      premium: premium.toFixed(2)
+      premium: premium.toFixed(2),
     };
   });
 };
@@ -149,26 +160,26 @@ const generateMockOpportunities = () => {
   return [
     {
       id: 1,
-      coin: 'BTC',
-      buyExchange: '바이낸스',
-      sellExchange: '빗썸',
+      coin: "BTC",
+      buyExchange: "바이낸스",
+      sellExchange: "빗썸",
       buyPrice: 137000000,
       sellPrice: 140500000,
       profitRate: 2.55,
       estimatedProfit: 175000,
-      status: 'active'
+      status: "active",
     },
     {
       id: 2,
-      coin: 'ETH',
-      buyExchange: '바이낸스',
-      sellExchange: '업비트',
+      coin: "ETH",
+      buyExchange: "바이낸스",
+      sellExchange: "업비트",
       buyPrice: 4600000,
       sellPrice: 4720000,
       profitRate: 2.61,
       estimatedProfit: 65000,
-      status: 'active'
-    }
+      status: "active",
+    },
   ];
 };
 
