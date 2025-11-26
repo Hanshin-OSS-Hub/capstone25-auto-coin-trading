@@ -2,7 +2,6 @@ package com.capston.arbitrage.controller;
 
 import com.capston.arbitrage.entity.TradingSettings;
 import com.capston.arbitrage.service.TradingSettingsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,11 +9,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/settings")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000") // React 프론트엔드 허용
 public class TradingSettingsController {
 
     private final TradingSettingsService service;
+
+    // 생성자 주입
+    public TradingSettingsController(TradingSettingsService service) {
+        this.service = service;
+    }
 
     // GET /api/settings - 모든 설정 조회
     @GetMapping
