@@ -1,87 +1,91 @@
 package com.capston.arbitrage.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "trading_settings")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class TradingSettings {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "setting_id")
-    private Integer settingId;
+    private Integer id;
 
-    @Column(name = "setting_name", unique = true, nullable = false, length = 50)
+    @Column(name = "setting_name", nullable = false)
     private String settingName;
 
-    // 진입 조건
-    @Column(name = "entry_min_premium", precision = 10, scale = 4)
-    private BigDecimal entryMinPremium = BigDecimal.valueOf(2.0);
+    @Column(name = "entry_min_premium")
+    private Double entryMinPremium;
 
-    @Column(name = "entry_min_net_premium", precision = 10, scale = 4)
-    private BigDecimal entryMinNetPremium = BigDecimal.valueOf(1.5);
+    @Column(name = "position_size")
+    private Double positionSize;
 
-    @Column(name = "position_size", precision = 20, scale = 2)
-    private BigDecimal positionSize = BigDecimal.valueOf(5000000);
+    @Column(name = "exit_target_premium")
+    private Double exitTargetPremium;
 
-    // 청산 조건
-    @Column(name = "exit_target_premium", precision = 10, scale = 4)
-    private BigDecimal exitTargetPremium = BigDecimal.valueOf(0.5);
-
-    @Column(name = "exit_target_profit", precision = 20, scale = 2)
-    private BigDecimal exitTargetProfit = BigDecimal.valueOf(50000);
-
-    @Column(name = "exit_max_holding_time")
-    private Integer exitMaxHoldingTime = 3600;
-
-    // 손실 방어
-    @Column(name = "stop_loss_max_amount", precision = 20, scale = 2)
-    private BigDecimal stopLossMaxAmount = BigDecimal.valueOf(-30000);
-
-    @Column(name = "stop_loss_max_rate", precision = 10, scale = 6)
-    private BigDecimal stopLossMaxRate = BigDecimal.valueOf(-0.01);
-
-    @Column(name = "stop_loss_reverse_premium", precision = 10, scale = 4)
-    private BigDecimal stopLossReversePremium = BigDecimal.valueOf(-1.0);
-
-    // 트레일링 스톱
     @Column(name = "trailing_enabled")
-    private Boolean trailingEnabled = true;
+    private Boolean trailingEnabled;
 
-    @Column(name = "trailing_activation_profit", precision = 20, scale = 2)
-    private BigDecimal trailingActivationProfit = BigDecimal.valueOf(30000);
+    // 기본 생성자
+    public TradingSettings() {
+    }
 
-    @Column(name = "trailing_distance", precision = 20, scale = 2)
-    private BigDecimal trailingDistance = BigDecimal.valueOf(10000);
+    // 전체 생성자
+    public TradingSettings(Integer id, String settingName, Double entryMinPremium,
+                           Double positionSize, Double exitTargetPremium, Boolean trailingEnabled) {
+        this.id = id;
+        this.settingName = settingName;
+        this.entryMinPremium = entryMinPremium;
+        this.positionSize = positionSize;
+        this.exitTargetPremium = exitTargetPremium;
+        this.trailingEnabled = trailingEnabled;
+    }
 
-    // 리밸런싱
-    @Column(name = "rebalance_threshold", precision = 10, scale = 4)
-    private BigDecimal rebalanceThreshold = BigDecimal.valueOf(0.15);
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
 
-    @Column(name = "rebalance_check_interval")
-    private Integer rebalanceCheckInterval = 3600;
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+    public String getSettingName() {
+        return settingName;
+    }
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    public void setSettingName(String settingName) {
+        this.settingName = settingName;
+    }
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public Double getEntryMinPremium() {
+        return entryMinPremium;
+    }
+
+    public void setEntryMinPremium(Double entryMinPremium) {
+        this.entryMinPremium = entryMinPremium;
+    }
+
+    public Double getPositionSize() {
+        return positionSize;
+    }
+
+    public void setPositionSize(Double positionSize) {
+        this.positionSize = positionSize;
+    }
+
+    public Double getExitTargetPremium() {
+        return exitTargetPremium;
+    }
+
+    public void setExitTargetPremium(Double exitTargetPremium) {
+        this.exitTargetPremium = exitTargetPremium;
+    }
+
+    public Boolean getTrailingEnabled() {
+        return trailingEnabled;
+    }
+
+    public void setTrailingEnabled(Boolean trailingEnabled) {
+        this.trailingEnabled = trailingEnabled;
+    }
 }
