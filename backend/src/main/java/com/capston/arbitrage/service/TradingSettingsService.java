@@ -2,18 +2,21 @@ package com.capston.arbitrage.service;
 
 import com.capston.arbitrage.entity.TradingSettings;
 import com.capston.arbitrage.repository.TradingSettingsRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TradingSettingsService {
 
     private final TradingSettingsRepository repository;
+
+    // 생성자 주입
+    public TradingSettingsService(TradingSettingsRepository repository) {
+        this.repository = repository;
+    }
 
     // 모든 설정 조회
     public List<TradingSettings> getAllSettings() {
