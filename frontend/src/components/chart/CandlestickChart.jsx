@@ -22,7 +22,7 @@ const ArbitrageCandlestickChart = () => {
   const symbolMap = {
     BTC: { upbit: "KRW-BTC", binance: "BTCUSDT" },
     ETH: { upbit: "KRW-ETH", binance: "ETHUSDT" },
-    XRP: { upbit: "KRW-XRP", binance: "XRPUSDT" },
+    SOL: { upbit: "KRW-SOL", binance: "SOLUSDT" },
   };
 
   // 차트 초기화
@@ -358,7 +358,7 @@ const ArbitrageCandlestickChart = () => {
 
       {/* 코인 선택 */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        {["BTC", "ETH", "XRP"].map((coin) => (
+        {["BTC", "ETH", "SOL"].map((coin) => (
           <button
             key={coin}
             onClick={() => handleSymbolChange(coin)}
