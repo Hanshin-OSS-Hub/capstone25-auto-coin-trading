@@ -17,104 +17,135 @@ const ArbitrageCandlestickChart = () => {
   const [usdToKrw, setUsdToKrw] = useState(1300); // 환율 (임시)
   const [priceDiff, setPriceDiff] = useState(null);
   const [diffPercent, setDiffPercent] = useState(null);
+  const [chartError, setChartError] = useState(null);
 
   // 심볼 매핑
   const symbolMap = {
     BTC: { upbit: "KRW-BTC", binance: "BTCUSDT" },
     ETH: { upbit: "KRW-ETH", binance: "ETHUSDT" },
-    XRP: { upbit: "KRW-XRP", binance: "XRPUSDT" },
+    SOL: { upbit: "KRW-SOL", binance: "SOLUSDT" },
   };
 
   // 차트 초기화
   useEffect(() => {
+    // 라이브러리 import 확인
+    console.log("createChart function:", typeof createChart);
+
     // 업비트 차트
-    if (upbitChartRef.current) {
-      const upbitChart = createChart(upbitChartRef.current, {
-        width: upbitChartRef.current.clientWidth,
-        height: 400,
-        layout: {
-          background: { color: "#1a1a1a" },
-          textColor: "#d1d4dc",
-        },
-        grid: {
-          vertLines: { color: "#2a2a2a" },
-          horzLines: { color: "#2a2a2a" },
-        },
-        timeScale: {
-          timeVisible: true,
-          secondsVisible: false,
-        },
-      });
+    if (upbitChartRef.current && !upbitChartRef.current.chartInstance) {
+      try {
+        console.log("Creating Upbit chart...");
 
-      const upbitCandleSeries = upbitChart.addCandlestickSeries({
-        upColor: "#26a69a",
-        downColor: "#ef5350",
-        borderVisible: false,
-        wickUpColor: "#26a69a",
-        wickDownColor: "#ef5350",
-      });
+        const upbitChart = createChart(upbitChartRef.current, {
+          width: upbitChartRef.current.clientWidth,
+          height: 400,
+          layout: {
+            background: { color: "#1a1a1a" },
+            textColor: "#d1d4dc",
+          },
+          grid: {
+            vertLines: { color: "#2a2a2a" },
+            horzLines: { color: "#2a2a2a" },
+          },
+          timeScale: {
+            timeVisible: true,
+            secondsVisible: false,
+          },
+        });
 
-      const upbitVolumeSeries = upbitChart.addHistogramSeries({
-        color: "#26a69a",
-        priceFormat: { type: "volume" },
-        priceScaleId: "",
-      });
+        console.log("Upbit chart created:", upbitChart);
+        console.log("Upbit chart methods:", Object.keys(upbitChart));
 
-      upbitVolumeSeries.priceScale().applyOptions({
-        scaleMargins: {
-          top: 0.7,
-          bottom: 0,
-        },
-      });
+        const upbitCandleSeries = upbitChart.addCandlestickSeries({
+          upColor: "#26a69a",
+          downColor: "#ef5350",
+          borderVisible: false,
+          wickUpColor: "#26a69a",
+          wickDownColor: "#ef5350",
+        });
 
-      upbitChartRef.current.chartInstance = upbitChart;
-      upbitCandleSeriesRef.current = upbitCandleSeries;
-      upbitVolumeSeriesRef.current = upbitVolumeSeries;
+        console.log("Upbit candle series created");
+
+        const upbitVolumeSeries = upbitChart.addHistogramSeries({
+          color: "#26a69a",
+          priceFormat: { type: "volume" },
+          priceScaleId: "",
+        });
+
+        upbitVolumeSeries.priceScale().applyOptions({
+          scaleMargins: {
+            top: 0.7,
+            bottom: 0,
+          },
+        });
+
+        upbitChartRef.current.chartInstance = upbitChart;
+        upbitCandleSeriesRef.current = upbitCandleSeries;
+        upbitVolumeSeriesRef.current = upbitVolumeSeries;
+
+        console.log("Upbit chart initialization complete");
+      } catch (error) {
+        console.error("Error creating Upbit chart:", error);
+        setChartError(`업비트 차트 생성 오류: ${error.message}`);
+      }
     }
 
     // 바이낸스 차트
-    if (binanceChartRef.current) {
-      const binanceChart = createChart(binanceChartRef.current, {
-        width: binanceChartRef.current.clientWidth,
-        height: 400,
-        layout: {
-          background: { color: "#1a1a1a" },
-          textColor: "#d1d4dc",
-        },
-        grid: {
-          vertLines: { color: "#2a2a2a" },
-          horzLines: { color: "#2a2a2a" },
-        },
-        timeScale: {
-          timeVisible: true,
-          secondsVisible: false,
-        },
-      });
+    if (binanceChartRef.current && !binanceChartRef.current.chartInstance) {
+      try {
+        console.log("Creating Binance chart...");
 
-      const binanceCandleSeries = binanceChart.addCandlestickSeries({
-        upColor: "#f0b90b",
-        downColor: "#ef5350",
-        borderVisible: false,
-        wickUpColor: "#f0b90b",
-        wickDownColor: "#ef5350",
-      });
+        const binanceChart = createChart(binanceChartRef.current, {
+          width: binanceChartRef.current.clientWidth,
+          height: 400,
+          layout: {
+            background: { color: "#1a1a1a" },
+            textColor: "#d1d4dc",
+          },
+          grid: {
+            vertLines: { color: "#2a2a2a" },
+            horzLines: { color: "#2a2a2a" },
+          },
+          timeScale: {
+            timeVisible: true,
+            secondsVisible: false,
+          },
+        });
 
-      const binanceVolumeSeries = binanceChart.addHistogramSeries({
-        color: "#f0b90b",
-        priceFormat: { type: "volume" },
-        priceScaleId: "",
-      });
+        console.log("Binance chart created:", binanceChart);
 
-      binanceVolumeSeries.priceScale().applyOptions({
-        scaleMargins: {
-          top: 0.7,
-          bottom: 0,
-        },
-      });
+        const binanceCandleSeries = binanceChart.addCandlestickSeries({
+          upColor: "#f0b90b",
+          downColor: "#ef5350",
+          borderVisible: false,
+          wickUpColor: "#f0b90b",
+          wickDownColor: "#ef5350",
+        });
 
-      binanceChartRef.current.chartInstance = binanceChart;
-      binanceCandleSeriesRef.current = binanceCandleSeries;
-      binanceVolumeSeriesRef.current = binanceVolumeSeries;
+        console.log("Binance candle series created");
+
+        const binanceVolumeSeries = binanceChart.addHistogramSeries({
+          color: "#f0b90b",
+          priceFormat: { type: "volume" },
+          priceScaleId: "",
+        });
+
+        binanceVolumeSeries.priceScale().applyOptions({
+          scaleMargins: {
+            top: 0.7,
+            bottom: 0,
+          },
+        });
+
+        binanceChartRef.current.chartInstance = binanceChart;
+        binanceCandleSeriesRef.current = binanceCandleSeries;
+        binanceVolumeSeriesRef.current = binanceVolumeSeries;
+
+        console.log("Binance chart initialization complete");
+      } catch (error) {
+        console.error("Error creating Binance chart:", error);
+        setChartError(`바이낸스 차트 생성 오류: ${error.message}`);
+      }
     }
 
     // 반응형 처리
@@ -156,78 +187,99 @@ const ArbitrageCandlestickChart = () => {
         upbitWsRef.current.close();
       }
 
-      const ws = new WebSocket("wss://api.upbit.com/websocket/v1");
-      upbitWsRef.current = ws;
+      try {
+        const ws = new WebSocket("wss://api.upbit.com/websocket/v1");
+        upbitWsRef.current = ws;
 
-      ws.onopen = () => {
-        ws.send(
-          JSON.stringify([
-            { ticket: "upbit" },
-            { type: "ticker", codes: [upbitSymbol] },
-          ])
-        );
-      };
+        ws.onopen = () => {
+          console.log("Upbit WebSocket connected");
+          ws.send(
+            JSON.stringify([
+              { ticket: "upbit" },
+              { type: "ticker", codes: [upbitSymbol] },
+            ])
+          );
+        };
 
-      ws.onmessage = async (event) => {
-        const text = await event.data.text();
-        const data = JSON.parse(text);
+        ws.onmessage = async (event) => {
+          try {
+            const text = await event.data.text();
+            const data = JSON.parse(text);
 
-        if (data.type === "ticker") {
-          const price = data.trade_price;
-          const volume = data.acc_trade_volume_24h;
-          const timestamp =
-            (Math.floor(data.timestamp / CANDLE_INTERVAL) * CANDLE_INTERVAL) /
-            1000;
+            if (data.type === "ticker") {
+              const price = data.trade_price;
+              const volume = data.acc_trade_volume_24h;
+              const timestamp =
+                (Math.floor(data.timestamp / CANDLE_INTERVAL) *
+                  CANDLE_INTERVAL) /
+                1000;
 
-          setUpbitPrice(price);
+              setUpbitPrice(price);
 
-          if (!upbitCandleData[timestamp]) {
-            upbitCandleData[timestamp] = {
-              time: timestamp,
-              open: price,
-              high: price,
-              low: price,
-              close: price,
-            };
-            upbitVolumeData[timestamp] = {
-              time: timestamp,
-              value: volume,
-              color:
-                price >= upbitCandleData[timestamp]?.open
-                  ? "#26a69a"
-                  : "#ef5350",
-            };
-          } else {
-            upbitCandleData[timestamp].high = Math.max(
-              upbitCandleData[timestamp].high,
-              price
-            );
-            upbitCandleData[timestamp].low = Math.min(
-              upbitCandleData[timestamp].low,
-              price
-            );
-            upbitCandleData[timestamp].close = price;
-            upbitVolumeData[timestamp].value = volume;
-            upbitVolumeData[timestamp].color =
-              price >= upbitCandleData[timestamp].open ? "#26a69a" : "#ef5350";
+              if (!upbitCandleData[timestamp]) {
+                upbitCandleData[timestamp] = {
+                  time: timestamp,
+                  open: price,
+                  high: price,
+                  low: price,
+                  close: price,
+                };
+                upbitVolumeData[timestamp] = {
+                  time: timestamp,
+                  value: volume,
+                  color:
+                    price >= upbitCandleData[timestamp]?.open
+                      ? "#26a69a"
+                      : "#ef5350",
+                };
+              } else {
+                upbitCandleData[timestamp].high = Math.max(
+                  upbitCandleData[timestamp].high,
+                  price
+                );
+                upbitCandleData[timestamp].low = Math.min(
+                  upbitCandleData[timestamp].low,
+                  price
+                );
+                upbitCandleData[timestamp].close = price;
+                upbitVolumeData[timestamp].value = volume;
+                upbitVolumeData[timestamp].color =
+                  price >= upbitCandleData[timestamp].open
+                    ? "#26a69a"
+                    : "#ef5350";
+              }
+
+              if (
+                upbitCandleSeriesRef.current &&
+                upbitVolumeSeriesRef.current
+              ) {
+                const sortedCandles = Object.values(upbitCandleData).sort(
+                  (a, b) => a.time - b.time
+                );
+                const sortedVolumes = Object.values(upbitVolumeData).sort(
+                  (a, b) => a.time - b.time
+                );
+                upbitCandleSeriesRef.current.setData(sortedCandles);
+                upbitVolumeSeriesRef.current.setData(sortedVolumes);
+              }
+            }
+          } catch (error) {
+            console.error("Error processing Upbit message:", error);
           }
+        };
 
-          if (upbitCandleSeriesRef.current && upbitVolumeSeriesRef.current) {
-            const sortedCandles = Object.values(upbitCandleData).sort(
-              (a, b) => a.time - b.time
-            );
-            const sortedVolumes = Object.values(upbitVolumeData).sort(
-              (a, b) => a.time - b.time
-            );
-            upbitCandleSeriesRef.current.setData(sortedCandles);
-            upbitVolumeSeriesRef.current.setData(sortedVolumes);
-          }
-        }
-      };
+        ws.onerror = (error) => {
+          console.error("Upbit WebSocket error:", error);
+        };
 
-      ws.onclose = () => {
+        ws.onclose = () => {
+          console.log("Upbit WebSocket closed, reconnecting...");
+          setTimeout(connectUpbit, 3000);
+        };
+      } catch (error) {
+        console.error("Error connecting to Upbit:", error);
         setTimeout(connectUpbit, 3000);
-      };
+      }
     };
 
     connectUpbit();
@@ -251,66 +303,89 @@ const ArbitrageCandlestickChart = () => {
         binanceWsRef.current.close();
       }
 
-      const ws = new WebSocket(
-        `wss://stream.binance.com:9443/ws/${binanceSymbol}@trade`
-      );
-      binanceWsRef.current = ws;
+      try {
+        const ws = new WebSocket(
+          `wss://stream.binance.com:9443/ws/${binanceSymbol}@trade`
+        );
+        binanceWsRef.current = ws;
 
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        const price = parseFloat(data.p);
-        const volume = parseFloat(data.q);
-        const timestamp =
-          (Math.floor(data.T / CANDLE_INTERVAL) * CANDLE_INTERVAL) / 1000;
+        ws.onopen = () => {
+          console.log("Binance WebSocket connected");
+        };
 
-        setBinancePrice(price);
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            const price = parseFloat(data.p);
+            const volume = parseFloat(data.q);
+            const timestamp =
+              (Math.floor(data.T / CANDLE_INTERVAL) * CANDLE_INTERVAL) / 1000;
 
-        if (!binanceCandleData[timestamp]) {
-          binanceCandleData[timestamp] = {
-            time: timestamp,
-            open: price,
-            high: price,
-            low: price,
-            close: price,
-          };
-          binanceVolumeData[timestamp] = {
-            time: timestamp,
-            value: volume,
-            color:
-              price >= binanceCandleData[timestamp]?.open
-                ? "#f0b90b"
-                : "#ef5350",
-          };
-        } else {
-          binanceCandleData[timestamp].high = Math.max(
-            binanceCandleData[timestamp].high,
-            price
-          );
-          binanceCandleData[timestamp].low = Math.min(
-            binanceCandleData[timestamp].low,
-            price
-          );
-          binanceCandleData[timestamp].close = price;
-          binanceVolumeData[timestamp].value += volume;
-          binanceVolumeData[timestamp].color =
-            price >= binanceCandleData[timestamp].open ? "#f0b90b" : "#ef5350";
-        }
+            setBinancePrice(price);
 
-        if (binanceCandleSeriesRef.current && binanceVolumeSeriesRef.current) {
-          const sortedCandles = Object.values(binanceCandleData).sort(
-            (a, b) => a.time - b.time
-          );
-          const sortedVolumes = Object.values(binanceVolumeData).sort(
-            (a, b) => a.time - b.time
-          );
-          binanceCandleSeriesRef.current.setData(sortedCandles);
-          binanceVolumeSeriesRef.current.setData(sortedVolumes);
-        }
-      };
+            if (!binanceCandleData[timestamp]) {
+              binanceCandleData[timestamp] = {
+                time: timestamp,
+                open: price,
+                high: price,
+                low: price,
+                close: price,
+              };
+              binanceVolumeData[timestamp] = {
+                time: timestamp,
+                value: volume,
+                color:
+                  price >= binanceCandleData[timestamp]?.open
+                    ? "#f0b90b"
+                    : "#ef5350",
+              };
+            } else {
+              binanceCandleData[timestamp].high = Math.max(
+                binanceCandleData[timestamp].high,
+                price
+              );
+              binanceCandleData[timestamp].low = Math.min(
+                binanceCandleData[timestamp].low,
+                price
+              );
+              binanceCandleData[timestamp].close = price;
+              binanceVolumeData[timestamp].value += volume;
+              binanceVolumeData[timestamp].color =
+                price >= binanceCandleData[timestamp].open
+                  ? "#f0b90b"
+                  : "#ef5350";
+            }
 
-      ws.onclose = () => {
+            if (
+              binanceCandleSeriesRef.current &&
+              binanceVolumeSeriesRef.current
+            ) {
+              const sortedCandles = Object.values(binanceCandleData).sort(
+                (a, b) => a.time - b.time
+              );
+              const sortedVolumes = Object.values(binanceVolumeData).sort(
+                (a, b) => a.time - b.time
+              );
+              binanceCandleSeriesRef.current.setData(sortedCandles);
+              binanceVolumeSeriesRef.current.setData(sortedVolumes);
+            }
+          } catch (error) {
+            console.error("Error processing Binance message:", error);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error("Binance WebSocket error:", error);
+        };
+
+        ws.onclose = () => {
+          console.log("Binance WebSocket closed, reconnecting...");
+          setTimeout(connectBinance, 3000);
+        };
+      } catch (error) {
+        console.error("Error connecting to Binance:", error);
         setTimeout(connectBinance, 3000);
-      };
+      }
     };
 
     connectBinance();
@@ -356,9 +431,24 @@ const ArbitrageCandlestickChart = () => {
         🔄 차익거래 실시간 캔들차트
       </h2>
 
+      {/* 에러 메시지 표시 */}
+      {chartError && (
+        <div
+          style={{
+            padding: "15px",
+            marginBottom: "20px",
+            backgroundColor: "#ef5350",
+            color: "#fff",
+            borderRadius: "8px",
+          }}
+        >
+          ⚠️ {chartError}
+        </div>
+      )}
+
       {/* 코인 선택 */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        {["BTC", "ETH", "XRP"].map((coin) => (
+        {["BTC", "ETH", "SOL"].map((coin) => (
           <button
             key={coin}
             onClick={() => handleSymbolChange(coin)}
