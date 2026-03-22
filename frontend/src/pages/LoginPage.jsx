@@ -4,12 +4,18 @@ import "./LoginPage.css";
 
 // ── localStorage 헬퍼 함수 ──
 const getUsers = () => JSON.parse(localStorage.getItem("cubic_users") || "[]");
-const saveUsers = (users) => localStorage.setItem("cubic_users", JSON.stringify(users));
+const saveUsers = (users) =>
+  localStorage.setItem("cubic_users", JSON.stringify(users));
 
 export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({ email: "", password: "", name: "", confirmPassword: "" });
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    name: "",
+    confirmPassword: "",
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -58,13 +64,17 @@ export default function LoginPage({ onLogin }) {
         setLoading(false);
         return;
       }
-      const newUser = { email: form.email, password: form.password, name: form.name };
+      const newUser = {
+        email: form.email,
+        password: form.password,
+        name: form.name,
+      };
       saveUsers([...users, newUser]);
       onLogin({ email: newUser.email, name: newUser.name });
     } else {
       // ── 로그인: 이메일 + 비밀번호 일치 확인 ──
       const user = users.find(
-        (u) => u.email === form.email && u.password === form.password
+        (u) => u.email === form.email && u.password === form.password,
       );
       if (!user) {
         setErrors({ password: "이메일 또는 비밀번호가 올바르지 않아요." });
@@ -99,14 +109,30 @@ export default function LoginPage({ onLogin }) {
           </div>
 
           <div className="brand-headline">
-            <h2>AI가 분석하는<br />스마트한 투자</h2>
-            <p>3D 큐빅 모델 기반 AI가 실시간으로<br />최적의 투자 타이밍을 알려드립니다.</p>
+            <h2>
+              AI가 분석하는
+              <br />
+              스마트한 투자
+            </h2>
+            <p>
+              3D 큐빅 모델 기반 AI가 실시간으로
+              <br />
+              최적의 투자 타이밍을 알려드립니다.
+            </p>
           </div>
 
           <div className="brand-features">
             {[
-              { icon: "📊", title: "실시간 시장 분석", desc: "AI 기반 실시간 종목 분석" },
-              { icon: "🎯", title: "3D 큐빅 모델", desc: "입체적 데이터 시각화" },
+              {
+                icon: "📊",
+                title: "실시간 시장 분석",
+                desc: "AI 기반 실시간 종목 분석",
+              },
+              {
+                icon: "🎯",
+                title: "3D 큐빅 모델",
+                desc: "입체적 데이터 시각화",
+              },
               { icon: "🔔", title: "맞춤 알림", desc: "내 종목 실시간 알림" },
             ].map((f) => (
               <div key={f.title} className="feature-item">
@@ -140,7 +166,11 @@ export default function LoginPage({ onLogin }) {
           </div>
 
           <div className="form-header">
-            <h1>{mode === "login" ? "다시 만나서 반가워요 👋" : "큐빅증권 가입하기 🎉"}</h1>
+            <h1>
+              {mode === "login"
+                ? "다시 만나서 반가워요 👋"
+                : "큐빅증권 가입하기 🎉"}
+            </h1>
             <p>
               {mode === "login"
                 ? "계속하려면 로그인해 주세요."
@@ -161,7 +191,9 @@ export default function LoginPage({ onLogin }) {
                   onChange={handleChange}
                   className={errors.name ? "error" : ""}
                 />
-                {errors.name && <span className="error-msg">{errors.name}</span>}
+                {errors.name && (
+                  <span className="error-msg">{errors.name}</span>
+                )}
               </div>
             )}
 
@@ -176,26 +208,34 @@ export default function LoginPage({ onLogin }) {
                 onChange={handleChange}
                 className={errors.email ? "error" : ""}
               />
-              {errors.email && <span className="error-msg">{errors.email}</span>}
+              {errors.email && (
+                <span className="error-msg">{errors.email}</span>
+              )}
             </div>
 
             <div className="form-group">
               <label htmlFor="password">
                 비밀번호
                 {mode === "login" && (
-                  <button type="button" className="forgot-link">비밀번호 찾기</button>
+                  <button type="button" className="forgot-link">
+                    비밀번호 찾기
+                  </button>
                 )}
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
-                placeholder={mode === "signup" ? "8자 이상 입력해 주세요" : "비밀번호 입력"}
+                placeholder={
+                  mode === "signup" ? "8자 이상 입력해 주세요" : "비밀번호 입력"
+                }
                 value={form.password}
                 onChange={handleChange}
                 className={errors.password ? "error" : ""}
               />
-              {errors.password && <span className="error-msg">{errors.password}</span>}
+              {errors.password && (
+                <span className="error-msg">{errors.password}</span>
+              )}
             </div>
 
             {mode === "signup" && (
@@ -217,15 +257,27 @@ export default function LoginPage({ onLogin }) {
             )}
 
             <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? <span className="spinner" /> : mode === "login" ? "로그인" : "가입하기"}
+              {loading ? (
+                <span className="spinner" />
+              ) : mode === "login" ? (
+                "로그인"
+              ) : (
+                "가입하기"
+              )}
             </button>
           </form>
 
           <p className="switch-hint">
             {mode === "login" ? (
-              <>계정이 없으신가요? <button onClick={() => switchMode("signup")}>회원가입</button></>
+              <>
+                계정이 없으신가요?{" "}
+                <button onClick={() => switchMode("signup")}>회원가입</button>
+              </>
             ) : (
-              <>이미 계정이 있으신가요? <button onClick={() => switchMode("login")}>로그인</button></>
+              <>
+                이미 계정이 있으신가요?{" "}
+                <button onClick={() => switchMode("login")}>로그인</button>
+              </>
             )}
           </p>
         </div>

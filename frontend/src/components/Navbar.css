@@ -1,18 +1,26 @@
-/* Navbar.css — CUBIC 증권 오리지널 */
+/* Navbar.css */
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 100;
-  background: #0f2318;
-  height: 54px;
+  z-index: 200;
+  background: #ffffff;
+  height: 56px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--c-border);
+  width: 100%;
+  transition:
+    background 0.3s,
+    border-color 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+[data-theme="dark"] .navbar {
+  background: #0b0d13;
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .navbar-inner {
-  max-width: 1400px;
-  margin: 0 auto;
   width: 100%;
   padding: 0 24px;
   display: flex;
@@ -27,38 +35,39 @@
   gap: 10px;
   cursor: pointer;
   flex-shrink: 0;
-  text-decoration: none;
 }
-
 .logo-mark {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, #1a9e5c, #0f7a44);
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.25);
 }
-
 .logo-text-wrap {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 4px;
 }
-
 .logo-text {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
+  color: #111827;
+  letter-spacing: 1.5px;
+}
+[data-theme="dark"] .logo-text {
   color: #ffffff;
-  letter-spacing: 1px;
-  font-family: "Arial Black", sans-serif;
 }
 
 .logo-sub {
-  font-size: 12px;
-  font-weight: 500;
-  color: #4ade80;
-  letter-spacing: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0f766e;
+}
+[data-theme="dark"] .logo-sub {
+  color: #5eead4;
 }
 
 /* ── Nav links ── */
@@ -68,87 +77,101 @@
   gap: 2px;
   flex: 1;
 }
-
 .nav-link {
   background: none;
   border: none;
-  padding: 6px 14px;
-  font-size: 14px;
+  padding: 7px 14px;
+  font-size: 13.5px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: #9ca3af;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   transition: all 0.15s;
-  font-family: inherit;
   white-space: nowrap;
 }
-
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.04);
+  color: #374151;
 }
-
 .nav-link.active {
-  color: #4ade80;
+  color: #0f766e;
   font-weight: 700;
-  background: rgba(74, 222, 128, 0.08);
+  background: rgba(20, 184, 166, 0.06);
+}
+[data-theme="dark"] .nav-link {
+  color: rgba(255, 255, 255, 0.5);
+}
+[data-theme="dark"] .nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+}
+[data-theme="dark"] .nav-link.active {
+  color: #5eead4;
+  background: rgba(94, 234, 212, 0.08);
 }
 
 /* ── Right ── */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
-
 .search-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  padding: 6px 12px;
+  background: #f3f4f6;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 7px 12px;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.45);
+  color: #9ca3af;
   font-size: 13px;
-  font-family: inherit;
   transition: all 0.15s;
 }
-
 .search-btn:hover {
-  background: rgba(255, 255, 255, 0.11);
-  color: rgba(255, 255, 255, 0.7);
+  background: #e5e7eb;
+  color: #6b7280;
 }
-
+[data-theme="dark"] .search-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+}
+[data-theme="dark"] .search-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+}
 .search-shortcut {
-  font-size: 12px;
-  background: rgba(255, 255, 255, 0.12);
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 3px;
   padding: 1px 5px;
-  color: rgba(255, 255, 255, 0.5);
+  color: #9ca3af;
+  font-weight: 600;
+}
+[data-theme="dark"] .search-shortcut {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* ── User area ── */
 .user-area {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-
 .user-info {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a9e5c, #0f7a44);
-  border: 2px solid rgba(74, 222, 128, 0.5);
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,35 +180,45 @@
   color: #fff;
   flex-shrink: 0;
 }
-
 .user-name {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: #374151;
   white-space: nowrap;
+}
+[data-theme="dark"] .user-name {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .divider-v {
   width: 1px;
   height: 16px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--c-border);
+}
+[data-theme="dark"] .divider-v {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .btn-logout {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 6px;
-  padding: 5px 13px;
-  font-size: 13px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 6px 14px;
+  font-size: 12.5px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
-  cursor: pointer;
-  font-family: inherit;
+  color: #9ca3af;
   transition: all 0.15s;
 }
-
 .btn-logout:hover {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: #d1d5db;
+  color: #374151;
+}
+[data-theme="dark"] .btn-logout {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+}
+[data-theme="dark"] .btn-logout:hover {
+  border-color: rgba(255, 255, 255, 0.3);
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -195,40 +228,42 @@
   align-items: center;
   gap: 8px;
 }
-
 .btn-signup {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  padding: 6px 14px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 7px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  cursor: pointer;
-  font-family: inherit;
+  color: #6b7280;
   transition: all 0.15s;
 }
-
 .btn-signup:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: #f9fafb;
+  color: #374151;
+}
+[data-theme="dark"] .btn-signup {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+}
+[data-theme="dark"] .btn-signup:hover {
+  background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.9);
 }
 
 .btn-login {
-  background: #1a9e5c;
+  background: #14b8a6;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
+  border-radius: var(--r-sm);
+  padding: 7px 18px;
   font-size: 13px;
   font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
+  transition: all 0.15s;
+  box-shadow: 0 1px 4px rgba(20, 184, 166, 0.3);
 }
-
 .btn-login:hover {
-  background: #17864e;
+  background: #0d9488;
 }
 
 @media (max-width: 768px) {
@@ -237,5 +272,8 @@
   }
   .search-shortcut {
     display: none;
+  }
+  .navbar-inner {
+    padding: 0 16px;
   }
 }

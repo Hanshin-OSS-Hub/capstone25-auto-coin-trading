@@ -29,7 +29,13 @@ export default function App() {
         <Route path="/" element={<MainDashboard user={user} />} />
         <Route
           path="/login"
-          element={user ? <Navigate to="/" replace /> : <LoginPage onLogin={handleLogin} />}
+          element={
+            user ? (
+              <Navigate to="/" replace />
+            ) : (
+              <LoginPage onLogin={handleLogin} />
+            )
+          }
         />
         <Route
           path="/account"
