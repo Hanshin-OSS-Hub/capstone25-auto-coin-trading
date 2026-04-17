@@ -18,10 +18,13 @@ export default function AccountPage({ user }) {
     setLoading(true);
     try {
       const [bal, h, o] = await Promise.allSettled([getBalance(), getHoldings(), getOrders()]);
+      console.log("💰 잔고:", bal);
+      console.log("📦 보유종목:", h);
+      console.log("📜 주문내역:", o);
       if (bal.status === "fulfilled") setBalance(bal.value);
-      if (h.status === "fulfilled") setHoldings(h.value);
-      if (o.status === "fulfilled") setOrders(o.value);
-    } catch (e) { console.warn(e); }
+      if (h.status === "fulfilled") setHoldings(h.value || []);
+      if (o.status === "fulfilled") setOrders(o.value || []);
+    } catch (e) { console.error("계좌 데이터 로드 실패:", e); }
     finally { setLoading(false); }
   };
 

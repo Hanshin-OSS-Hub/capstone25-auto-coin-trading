@@ -36,9 +36,44 @@ export default function MainDashboard({user}){
   const[recentStocks,setRecentStocks]=useState([]);
   const searchTimer=useRef(null);
   const[dark,setDark]=useState(()=>localStorage.getItem("cubic_dark")==="true");
+  const[exchangeRate,setExchangeRate]=useState(()=>{
+    const saved=localStorage.getItem("cubic_usdkrw");
+    return saved?JSON.parse(saved):{rate:1380,change:0};
+  });
+
+  // 관심종목 (localStorage 기반)
+  const[watchlist,setWatchlist]=useState(()=>{
+    try{const s=localStorage.getItem("cubic_watchlist");return s?JSON.parse(s):[];}catch{return[];}
+  });
+  const isWatched=(symbol)=>watchlist.some(w=>w.symbol===symbol);
+  const toggleWatch=(stock,e)=>{
+    if(e)e.stopPropagation();
+    if(!user){alert("로그인 후 이용해 주세요.");return;}
+    setWatchlist(prev=>{
+      const next=isWatched(stock.symbol)?prev.filter(w=>w.symbol!==stock.symbol):[...prev,{symbol:stock.symbol,name:stock.name,market:stock.market,exchange:stock.exchange}];
+      localStorage.setItem("cubic_watchlist",JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(()=>{document.documentElement.setAttribute("data-theme",dark?"dark":"light");localStorage.setItem("cubic_dark",dark);},[dark]);
-  useEffect(()=>{fetchDefaultStocks();},[]);
+  useEffect(()=>{fetchDefaultStocks();fetchExchangeRate();},[]);
+
+  // 환율 가져오기
+  const fetchExchangeRate=async()=>{
+    try{
+      const res=await fetch("https://api.frankfurter.app/latest?from=USD&to=KRW");
+      const data=await res.json();
+      if(data?.rates?.KRW){
+        const rate=data.rates.KRW;
+        const prev=exchangeRate.rate;
+        const change=prev?((rate-prev)/prev*100).toFixed(2):0;
+        const obj={rate:Math.round(rate),change:Number(change)};
+        setExchangeRate(obj);
+        localStorage.setItem("cubic_usdkrw",JSON.stringify(obj));
+      }
+    }catch(e){console.warn("환율 로드 실패:",e);}
+  };
 
   // ── WebSocket 실시간 가격 업데이트 (3초마다) ──
   const handlePriceUpdate = useCallback((symbol, data) => {
@@ -92,16 +127,19 @@ export default function MainDashboard({user}){
           <button className="notice-btn" onClick={fetchDefaultStocks}>새로고침</button>
         </div>
         <div className="ticker-bar">
-          {stocks.length>0?(
-            <div className="ticker-scroll">
-              {stocks.slice(0,8).map(s=>(
-                <span key={s.symbol} className="ticker-item">
-                  <strong>{s.name}</strong> {s.price?fmtPrice(s.price,s.market):"-"}{" "}
-                  {s.changePercent&&<span className={Number(s.changePercent)>=0?"up":"down"}>{Number(s.changePercent)>=0?"+":""}{s.changePercent}%</span>}
-                </span>
-              ))}
-            </div>
-          ):<span>시장 데이터 로딩 중...</span>}
+          <div className="ticker-scroll">
+            <span className="ticker-item ticker-fx">
+              <strong>USD/KRW</strong> {fmt(exchangeRate.rate)}원{" "}
+              <span className={exchangeRate.change>=0?"up":"down"}>{exchangeRate.change>=0?"+":""}{exchangeRate.change}%</span>
+            </span>
+            <span className="ticker-divider">|</span>
+            {stocks.slice(0,8).map(s=>(
+              <span key={s.symbol} className="ticker-item">
+                <strong>{s.name}</strong> {s.price?fmtPrice(s.price,s.market):"-"}{" "}
+                {s.changePercent&&<span className={Number(s.changePercent)>=0?"up":"down"}>{Number(s.changePercent)>=0?"+":""}{s.changePercent}%</span>}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="main-area"><div className="content-row">
@@ -127,7 +165,10 @@ export default function MainDashboard({user}){
                 <div className="empty-box"><span className="empty-ico">📊</span><p className="empty-title">해당 종목이 없습니다</p></div>
               ):filteredStocks.map(s=>(
                 <div key={s.symbol} className={`tbl-row ${selectedStock?.symbol===s.symbol?"selected":""}`} onClick={()=>handleSelectStock(s)}>
-                  <span className="stock-name-cell"><strong>{s.name}</strong><small>{s.symbol} · <span className={`market-mini ${s.market?.toLowerCase()}`}>{s.market}</span></small></span>
+                  <span className="stock-name-cell">
+                    <button className={`star-btn ${isWatched(s.symbol)?"on":""}`} onClick={(e)=>toggleWatch(s,e)} title="관심종목">{isWatched(s.symbol)?"★":"☆"}</button>
+                    <div><strong>{s.name}</strong><small>{s.symbol} · <span className={`market-mini ${s.market?.toLowerCase()}`}>{s.market}</span></small></div>
+                  </span>
                   <span className="price-cell">{s.price?fmtPrice(s.price,s.market):"-"}</span>
                   <span className={`change-cell ${Number(s.changePercent)>=0?"up":"down"}`}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:"-"}</span>
                   <span className="order-cell"><button className="order-btn" onClick={e=>{e.stopPropagation();handleOpenTrade(s);}}>주문</button></span>
@@ -159,7 +200,7 @@ export default function MainDashboard({user}){
 
       <div className="sidebar">
         <div className={`slide-panel ${openPanel?"open":""}`}>
-          {openPanel==="watchlist"&&<WatchlistPanel/>}
+          {openPanel==="watchlist"&&<WatchlistPanel watchlist={watchlist} stocks={stocks} onSelect={handleSelectStock} onRemove={(s)=>toggleWatch(s)}/>}
           {openPanel==="ai"&&<AiPanel/>}
           {openPanel==="recent"&&<RecentPanel stocks={recentStocks} onSelect={handleSelectStock}/>}
           {openPanel==="realtime"&&<RealtimePanel stocks={stocks.slice(0,8)} connected={wsConnected}/>}
@@ -179,7 +220,11 @@ export default function MainDashboard({user}){
 
 function PanelShell({title,sub,children,theme=""}){return<div className={`panel-shell ${theme}`}><div className="panel-hd"><span className="panel-title">{title}</span>{sub&&<span className="panel-sub">{sub}</span>}</div><div className="panel-body">{children}</div></div>;}
 function EmptyMsg({icon,title,desc}){return<div className="panel-empty"><span className="panel-empty-ico">{icon}</span><p className="panel-empty-title">{title}</p><p className="panel-empty-desc">{desc}</p></div>;}
-function WatchlistPanel(){return<PanelShell title="관심종목" sub="관심 그룹에 담아보세요" theme="theme-rose"><EmptyMsg icon="♡" title="관심 종목이 없어요" desc={"종목 옆 ☆ 버튼을 눌러\n관심종목을 추가해 보세요."}/></PanelShell>;}
+function WatchlistPanel({watchlist=[],stocks=[],onSelect,onRemove}){
+  // watchlist에 있는 종목의 실시간 가격 매칭
+  const items=watchlist.map(w=>{const live=stocks.find(s=>s.symbol===w.symbol);return live?{...w,...live}:w;});
+  return<PanelShell title="관심종목" sub={`${items.length}개 종목`} theme="theme-rose">{!items.length?<EmptyMsg icon="♡" title="관심 종목이 없어요" desc={"종목 옆 ☆ 버튼을 눌러\n관심종목을 추가해 보세요."}/>:<div className="panel-list">{items.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):s.symbol}</small></div><div style={{display:"flex",alignItems:"center",gap:6}}><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span><button className="star-btn on" onClick={e=>{e.stopPropagation();onRemove?.(s)}} style={{fontSize:14,border:"none",background:"none",color:"#e11d48",cursor:"pointer"}}>★</button></div></div>)}</div>}</PanelShell>;
+}
 function AiPanel(){return<PanelShell title="✦ AI 큐빅 분석" sub="3D 큐빅 모델 실시간 신호" theme="theme-violet"><EmptyMsg icon="✦" title="AI 분석 연동 예정" desc={"백엔드 연동 후\n실시간 신호가 표시됩니다."}/></PanelShell>;}
 function RecentPanel({stocks=[],onSelect}){return<PanelShell title="최근 본 종목" sub="오늘 조회한 종목" theme="theme-amber">{!stocks.length?<EmptyMsg icon="🕐" title="최근 본 종목이 없어요" desc={"종목을 클릭하면\n여기에 기록됩니다."}/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.symbol}</small></div><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span></div>)}</div>}</PanelShell>;}
 function RealtimePanel({stocks=[],connected}){return<PanelShell title={<>실시간 체결 {connected&&<span style={{color:"#22c55e",fontSize:10}}>● LIVE</span>}</>} sub="주요 종목 현황 (3초 갱신)" theme="theme-cyan">{!stocks.length?<EmptyMsg icon="⚡" title="데이터 로딩 중" desc="잠시만 기다려주세요."/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item"><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):"-"}</small></div><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span></div>)}</div>}</PanelShell>;}

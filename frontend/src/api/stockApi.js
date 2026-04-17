@@ -3,137 +3,79 @@ import axios from "axios";
 
 const NGROK_URL = "https://rockiness-venture-reptilian.ngrok-free.dev";
 
-// 공개 API (로그인/회원가입 등 - withCredentials 없음)
-const publicApi = axios.create({
+// 모든 요청에 withCredentials: true → 세션 쿠키 유지
+const api = axios.create({
   baseURL: NGROK_URL,
-  headers: {
-    "ngrok-skip-browser-warning": "true",
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
-});
-
-// 인증 API (매매 등 세션 필요 - withCredentials 포함)
-const authApi = axios.create({
-  baseURL: NGROK_URL,
-  headers: {
-    "ngrok-skip-browser-warning": "true",
-    "Content-Type": "application/json",
-  },
+  headers: { "ngrok-skip-browser-warning": "true", "Content-Type": "application/json" },
   withCredentials: true,
   timeout: 10000,
 });
 
-/* ═══════════ 회원 (공개) ═══════════ */
+/* ═══════════ 회원 ═══════════ */
 export const signUp = async (email, password, name) => {
-  const res = await publicApi.post("/api/users/signup", {
-    email,
-    password,
-    name,
-  });
+  const res = await api.post("/api/users/signup", { email, password, name });
   return res.data;
 };
 export const login = async (email, password) => {
-  const res = await publicApi.post("/api/users/login", { email, password });
+  const res = await api.post("/api/users/login", { email, password });
   return res.data;
 };
 export const logout = async () => {
-  try {
-    await authApi.post("/api/users/logout");
-  } catch {}
+  try { await api.post("/api/users/logout"); } catch {}
 };
 export const getMyInfo = async () => {
-  const res = await authApi.get("/api/users/me");
+  const res = await api.get("/api/users/me");
   return res.data;
 };
 
 /* ═══════════ 매매 (인증) ═══════════ */
 export const buyStock = async (payload) => {
-  const res = await authApi.post("/api/trade/buy", payload);
+  const res = await api.post("/api/trade/buy", payload);
   return res.data;
 };
 export const sellStock = async (payload) => {
-  const res = await authApi.post("/api/trade/sell", payload);
+  const res = await api.post("/api/trade/sell", payload);
   return res.data;
 };
-export const getBalance = async () => {
-  const r = await authApi.get("/api/trade/balance");
-  return r.data;
-};
-export const getHoldings = async () => {
-  const r = await authApi.get("/api/trade/holdings");
-  return r.data;
-};
-export const getOrders = async () => {
-  const r = await authApi.get("/api/trade/orders");
-  return r.data;
-};
+export const getBalance = async () => { const r = await api.get("/api/trade/balance"); return r.data; };
+export const getHoldings = async () => { const r = await api.get("/api/trade/holdings"); return r.data; };
+export const getOrders = async () => { const r = await api.get("/api/trade/orders"); return r.data; };
 
 /* ═══════════ 시세 (공개) ═══════════ */
 export const searchStocks = async (keyword) => {
-  const res = await publicApi.get(
-    `/api/stocks/search?keyword=${encodeURIComponent(keyword)}`,
-  );
+  const res = await api.get(`/api/stocks/search?keyword=${encodeURIComponent(keyword)}`);
   return res.data;
 };
 export const getDomesticPrice = async (symbol) => {
-  const res = await publicApi.get(`/api/stocks/domestic/${symbol}`);
+  const res = await api.get(`/api/stocks/domestic/${symbol}`);
   return res.data;
 };
 export const getOverseasPrice = async (symbol, exchange = "NAS") => {
-  const res = await publicApi.get(
-    `/api/stocks/overseas/${symbol}?exchange=${exchange}`,
-  );
+  const res = await api.get(`/api/stocks/overseas/${symbol}?exchange=${exchange}`);
   return res.data;
 };
 export const getDomesticChart = async (symbol, period = "D") => {
-  const res = await publicApi.get(
-    `/api/stocks/chart/domestic/${symbol}?period=${period}`,
-  );
+  const res = await api.get(`/api/stocks/chart/domestic/${symbol}?period=${period}`);
   return res.data;
 };
-export const getOverseasChart = async (
-  symbol,
-  exchange = "NAS",
-  period = "0",
-) => {
-  const res = await publicApi.get(
-    `/api/stocks/chart/overseas/${symbol}?exchange=${exchange}&period=${period}`,
-  );
+export const getOverseasChart = async (symbol, exchange = "NAS", period = "0") => {
+  const res = await api.get(`/api/stocks/chart/overseas/${symbol}?exchange=${exchange}&period=${period}`);
   return res.data;
 };
 export const getDomesticMinute = async (symbol, timeUnit = 5) => {
-  const res = await publicApi.get(
-    `/api/stocks/chart/domestic/${symbol}/minute?timeUnit=${timeUnit}`,
-  );
+  const res = await api.get(`/api/stocks/chart/domestic/${symbol}/minute?timeUnit=${timeUnit}`);
   return res.data;
 };
-export const getOverseasMinute = async (
-  symbol,
-  exchange = "NAS",
-  timeUnit = 5,
-) => {
-  const res = await publicApi.get(
-    `/api/stocks/chart/overseas/${symbol}/minute?exchange=${exchange}&timeUnit=${timeUnit}`,
-  );
+export const getOverseasMinute = async (symbol, exchange = "NAS", timeUnit = 5) => {
+  const res = await api.get(`/api/stocks/chart/overseas/${symbol}/minute?exchange=${exchange}&timeUnit=${timeUnit}`);
   return res.data;
 };
 
 /* ═══════════ 유틸 ═══════════ */
-export const getExchangeCode = (market) =>
-  ({ NASDAQ: "NAS", NYSE: "NYS", AMEX: "AMS" })[market] || "NAS";
-export const isDomestic = (market) =>
-  ["KOSPI", "KOSDAQ", "ETF"].includes(market);
-export const fmt = (n) => {
-  const num = Number(n);
-  return isNaN(num) ? n : num.toLocaleString("ko-KR");
-};
-export const fmtPrice = (price, market) =>
-  !price
-    ? "-"
-    : isDomestic(market)
-      ? `${fmt(price)}원`
-      : `$${Number(price).toFixed(2)}`;
+export const getExchangeCode = (market) => ({ NASDAQ: "NAS", NYSE: "NYS", AMEX: "AMS" }[market] || "NAS");
+export const isDomestic = (market) => ["KOSPI", "KOSDAQ", "ETF"].includes(market);
+export const fmt = (n) => { const num = Number(n); return isNaN(num) ? n : num.toLocaleString("ko-KR"); };
+export const fmtPrice = (price, market) => !price ? "-" : isDomestic(market) ? `${fmt(price)}원` : `$${Number(price).toFixed(2)}`;
 
 export const DOMESTIC_STOCKS = [
   { symbol: "005930", name: "삼성전자", market: "KOSPI" },
@@ -154,14 +96,14 @@ export const DOMESTIC_STOCKS = [
   { symbol: "041510", name: "에스엠", market: "KOSDAQ" },
 ];
 export const OVERSEAS_STOCKS = [
-  { symbol: "AAPL", name: "Apple", market: "NASDAQ", exchange: "NAS" },
-  { symbol: "NVDA", name: "NVIDIA", market: "NASDAQ", exchange: "NAS" },
-  { symbol: "TSLA", name: "Tesla", market: "NASDAQ", exchange: "NAS" },
+  { symbol: "AAPL", name: "Apple",     market: "NASDAQ", exchange: "NAS" },
+  { symbol: "NVDA", name: "NVIDIA",    market: "NASDAQ", exchange: "NAS" },
+  { symbol: "TSLA", name: "Tesla",     market: "NASDAQ", exchange: "NAS" },
   { symbol: "MSFT", name: "Microsoft", market: "NASDAQ", exchange: "NAS" },
-  { symbol: "AMZN", name: "Amazon", market: "NASDAQ", exchange: "NAS" },
-  { symbol: "GOOG", name: "Alphabet", market: "NASDAQ", exchange: "NAS" },
-  { symbol: "META", name: "Meta", market: "NASDAQ", exchange: "NAS" },
+  { symbol: "AMZN", name: "Amazon",    market: "NASDAQ", exchange: "NAS" },
+  { symbol: "GOOG", name: "Alphabet",  market: "NASDAQ", exchange: "NAS" },
+  { symbol: "META", name: "Meta",      market: "NASDAQ", exchange: "NAS" },
 ];
 
 export { NGROK_URL };
-export default publicApi;
+export default api;
