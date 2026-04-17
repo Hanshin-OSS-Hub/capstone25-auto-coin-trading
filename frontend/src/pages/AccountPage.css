@@ -1,0 +1,179 @@
+/* AccountPage.css */
+.account-page {
+  height: calc(100vh - 56px);
+  background: var(--c-bg);
+  overflow-y: auto;
+  padding: 32px 24px;
+  transition: background 0.3s;
+}
+.account-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+.account-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--c-text);
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.account-header p { font-size: 14px; color: var(--c-text-sub); }
+.refresh-btn {
+  padding: 8px 16px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-sub);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.refresh-btn:hover { background: var(--c-hover); }
+
+/* 자산 카드 */
+.asset-summary {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.asset-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.3s, border-color 0.3s;
+}
+.asset-card.primary {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border-color: #99f6e4;
+}
+[data-theme="dark"] .asset-card.primary {
+  background: linear-gradient(135deg, #042f2e 0%, #0f3d3c 100%);
+  border-color: rgba(94,234,212,0.2);
+}
+.asset-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+.asset-card.primary .asset-label { color: #0f766e; }
+[data-theme="dark"] .asset-card.primary .asset-label { color: #5eead4; }
+.asset-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--c-text);
+  letter-spacing: -0.5px;
+}
+.asset-card.primary .asset-value { color: #134e4a; }
+[data-theme="dark"] .asset-card.primary .asset-value { color: #ccfbf1; }
+.asset-sub { font-size: 11.5px; color: var(--c-text-muted); }
+
+/* 탭 */
+.account-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--c-border);
+  margin-bottom: 16px;
+}
+.acc-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.acc-tab:hover { color: var(--c-text-sub); }
+.acc-tab.active {
+  color: #0f766e;
+  border-bottom-color: #14b8a6;
+}
+[data-theme="dark"] .acc-tab.active {
+  color: #5eead4;
+  border-bottom-color: #2dd4bf;
+}
+
+/* 테이블 */
+.acc-table {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+.acc-table-head {
+  display: grid;
+  padding: 12px 18px;
+  background: var(--c-hover);
+  border-bottom: 1px solid var(--c-border-light);
+}
+.acc-table-head span {
+  font-size: 11.5px;
+  color: var(--c-text-muted);
+  font-weight: 600;
+  text-align: right;
+}
+.acc-table-head span:first-child { text-align: left; }
+
+.holdings-grid { grid-template-columns: 2.5fr 1fr 1fr 1.2fr; }
+.orders-grid { grid-template-columns: 2.5fr 0.8fr 1fr 1fr 1.4fr; }
+
+.acc-table-row {
+  display: grid;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--c-border-light);
+  align-items: center;
+  transition: background 0.12s;
+}
+.acc-table-row:last-child { border-bottom: none; }
+.acc-table-row:hover { background: var(--c-hover); }
+
+.acc-name { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+.acc-name strong { font-size: 13.5px; font-weight: 700; color: var(--c-text); }
+.acc-name small { font-size: 11.5px; color: var(--c-text-muted); }
+.acc-num { font-size: 13px; color: var(--c-text-sub); text-align: right; font-weight: 500; }
+.acc-num.strong { font-weight: 700; color: var(--c-text); }
+.acc-num.small { font-size: 12px; }
+
+.order-type {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.order-type.buy { background: rgba(239,68,68,0.1); color: #dc2626; }
+.order-type.sell { background: rgba(59,130,246,0.1); color: #2563eb; }
+
+.acc-empty {
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.acc-empty-ico { font-size: 36px; opacity: 0.6; }
+.acc-empty p { font-size: 14px; font-weight: 700; color: var(--c-text); }
+.acc-empty small { font-size: 12px; color: var(--c-text-muted); }
+
+@media (max-width: 768px) {
+  .asset-summary { grid-template-columns: 1fr; }
+  .holdings-grid, .orders-grid { font-size: 12px; }
+}
