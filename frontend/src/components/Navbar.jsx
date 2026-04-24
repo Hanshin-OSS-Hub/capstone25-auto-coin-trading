@@ -7,8 +7,6 @@ export default function Navbar({ isLoggedIn, onLogout, user }) {
 
   const navItems = [
     { label: "홈", path: "/" },
-    { label: "시장", path: "/market" },
-    { label: "종목탐색", path: "/stocks" },
     { label: "AI분석", path: "/ai" },
     { label: "내 계좌", path: "/account" },
   ];

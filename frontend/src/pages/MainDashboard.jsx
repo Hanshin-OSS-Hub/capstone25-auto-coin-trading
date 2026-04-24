@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   searchStocks, getDomesticPrice, getOverseasPrice,
-  getExchangeCode, isDomestic, fmt, fmtPrice,
+  getExchangeCode, isDomestic, fmt, fmtPrice, fmtChange, isUp,
   getExchangeRate as fetchRate,
   getWatchlist, addWatchlist, removeWatchlist,
   DOMESTIC_STOCKS, OVERSEAS_STOCKS,
 } from "../api/stockApi";
 import StockChart from "../components/StockChart";
 import TradeModal from "../components/TradeModal";
+import OrderBook from "../components/OrderBook";
 import useRealtimePrice from "../hooks/useRealtimePrice";
 import "./MainDashboard.css";
 
-const MARKET_FILTERS = ["전체","코스피","코스닥","ETF","해외주식"];
-const MARKET_MAP = {"코스피":"KOSPI","코스닥":"KOSDAQ","ETF":"ETF","해외주식":"OVERSEAS"};
+const MARKET_FILTERS = ["전체","국내","해외"];
+const SORT_TABS = ["거래대금","급상승","급하락"];
+const MARKET_MAP = {"국내":"DOMESTIC","해외":"OVERSEAS"};
 
 const SIDE_PANELS = [
   {id:"watchlist",label:"관심",icon:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>},
@@ -25,7 +28,9 @@ function SunIcon(){return<svg width="18" height="18" viewBox="0 0 24 24" fill="n
 function MoonIcon(){return<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;}
 
 export default function MainDashboard({user}){
+  const navigate=useNavigate();
   const[activeCat,setActiveCat]=useState("전체");
+  const[activeSort,setActiveSort]=useState("거래대금");
   const[activeTab,setActiveTab]=useState("실시간 차트");
   const[openPanel,setOpenPanel]=useState(null);
   const[stocks,setStocks]=useState([]);
@@ -33,6 +38,7 @@ export default function MainDashboard({user}){
   const[error,setError]=useState(null);
   const[selectedStock,setSelectedStock]=useState(null);
   const[tradeModalStock,setTradeModalStock]=useState(null);
+  const[tradeMode,setTradeMode]=useState("buy");
   const[chartFullscreen,setChartFullscreen]=useState(false);
   const[searchQuery,setSearchQuery]=useState("");
   const[recentStocks,setRecentStocks]=useState([]);
@@ -47,7 +53,7 @@ export default function MainDashboard({user}){
   const isWatched=(symbol)=>watchlist.some(w=>w.symbol===symbol);
   const toggleWatch=async(stock,e)=>{
     if(e)e.stopPropagation();
-    if(!user){alert("로그인 후 이용해 주세요.");return;}
+    if(!user){alert("로그인 후 이용해 주세요.");navigate("/login");return;}
     try{
       if(isWatched(stock.symbol)){await removeWatchlist(stock.symbol);}
       else{await addWatchlist(stock.symbol,stock.name,stock.market);}
@@ -93,8 +99,20 @@ export default function MainDashboard({user}){
   },[]);
 
   const handleSelectStock=(stock)=>{setSelectedStock(stock);setRecentStocks(prev=>[stock,...prev.filter(s=>s.symbol!==stock.symbol)].slice(0,10));};
-  const handleOpenTrade=(stock)=>{if(!user){alert("로그인 후 이용해 주세요.");return;}setTradeModalStock(stock);};
-  const filteredStocks=stocks.filter(s=>{if(activeCat==="전체")return true;const mk=MARKET_MAP[activeCat];return mk==="OVERSEAS"?!isDomestic(s.market):s.market===mk;});
+  const handleOpenTrade=(stock,mode="buy")=>{if(!user){alert("로그인 후 이용해 주세요.");navigate("/login");return;}setTradeMode(mode);setTradeModalStock(stock);};
+  const filteredStocks=(()=>{
+    let list=[...stocks];
+    // 시장 필터
+    if(activeCat==="국내") list=list.filter(s=>isDomestic(s.market));
+    else if(activeCat==="해외") list=list.filter(s=>!isDomestic(s.market));
+    // 정렬
+    // 정렬 + 필터
+    const parseCP = (cp) => Number(String(cp||0).replace(/[+]/g,""));
+    if(activeSort==="급상승") { list=list.filter(s=>parseCP(s.changePercent)>0); list.sort((a,b)=>parseCP(b.changePercent)-parseCP(a.changePercent)); }
+    else if(activeSort==="급하락") { list=list.filter(s=>parseCP(s.changePercent)<0); list.sort((a,b)=>parseCP(a.changePercent)-parseCP(b.changePercent)); }
+    // 거래대금은 기본 순서 유지 (추후 API 연동)
+    return list.slice(0,30);
+  })();
   const togglePanel=(id)=>setOpenPanel(prev=>prev===id?null:id);
 
   // 관심종목에 실시간 가격 매칭
@@ -113,23 +131,30 @@ export default function MainDashboard({user}){
           <span className="ticker-divider">|</span>
           {stocks.slice(0,8).map(s=>(
             <span key={s.symbol} className="ticker-item"><strong>{s.name}</strong> {s.price?fmtPrice(s.price,s.market):"-"}{" "}
-            {s.changePercent&&<span className={Number(s.changePercent)>=0?"up":"down"}>{Number(s.changePercent)>=0?"+":""}{s.changePercent}%</span>}</span>
+            {s.changePercent&&<span className={isUp(s.changePercent)?"up":"down"}>{fmtChange(s.changePercent)}</span>}</span>
           ))}
         </div></div>
 
         <div className="main-area"><div className="content-row">
           <section className="stock-section">
             <div className="tab-row">
-              {["실시간 차트","테마·섹터","투자자 동향"].map(t=><button key={t} className={`tab-btn ${activeTab===t?"active":""}`} onClick={()=>setActiveTab(t)}>{t}</button>)}
+              {["실시간 차트","테마·섹터"].map(t=><button key={t} className={`tab-btn ${activeTab===t?"active":""}`} onClick={()=>setActiveTab(t)}>{t}</button>)}
               <div className="row-spacer"/>
               <div className="search-inline">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" placeholder="종목명 / 코드 검색" value={searchQuery} onChange={e=>handleSearch(e.target.value)}/>
               </div>
             </div>
-            <div className="cat-area"><div className="chip-row">
-              {MARKET_FILTERS.map(c=><button key={c} className={`chip ${activeCat===c?"active":""}`} onClick={()=>setActiveCat(c)}>{c}</button>)}
-            </div></div>
+            <div className="cat-area">
+              <div className="filter-row">
+                <div className="chip-row">
+                  {MARKET_FILTERS.map(c=><button key={c} className={`chip ${activeCat===c?"active":""}`} onClick={()=>setActiveCat(c)}>{c}</button>)}
+                </div>
+                <div className="sort-row">
+                  {SORT_TABS.map(s=><button key={s} className={`sort-chip ${activeSort===s?"active":""}`} onClick={()=>setActiveSort(s)}>{s}</button>)}
+                </div>
+              </div>
+            </div>
             <div className="tbl-head"><span style={{textAlign:"left"}}>종목</span><span>현재가</span><span>등락률</span><span>주문</span></div>
             <div className="tbl-body">
               {loading?(<div className="empty-box"><div className="loading-spinner"/><p className="empty-title">종목 데이터를 불러오는 중...</p></div>
@@ -142,21 +167,26 @@ export default function MainDashboard({user}){
                     <div><strong>{s.name}</strong><small>{s.symbol} · <span className={`market-mini ${s.market?.toLowerCase()}`}>{s.market}</span></small></div>
                   </span>
                   <span className="price-cell">{s.price?fmtPrice(s.price,s.market):"-"}</span>
-                  <span className={`change-cell ${Number(s.changePercent)>=0?"up":"down"}`}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:"-"}</span>
+                  <span className={`change-cell ${isUp(s.changePercent)?"up":"down"}`}>{s.changePercent?fmtChange(s.changePercent):"-"}</span>
                   <span className="order-cell"><button className="order-btn" onClick={e=>{e.stopPropagation();handleOpenTrade(s);}}>주문</button></span>
                 </div>
               ))}
             </div>
           </section>
 
-          <aside className={`chart-aside ${chartFullscreen?"hidden":""}`}>
+          <aside className={`chart-aside ${chartFullscreen?"hidden":""} ${selectedStock?"expanded":""}`}>
             {selectedStock?(<>
               <StockChart stock={selectedStock} fullscreen={chartFullscreen} onToggleFullscreen={()=>setChartFullscreen(v=>!v)}/>
-              <div className="trade-quick-box">
-                <button className="quick-buy" onClick={()=>handleOpenTrade(selectedStock)}>매수</button>
-                <button className="quick-sell" onClick={()=>handleOpenTrade(selectedStock)}>매도</button>
+              <div className="chart-detail-row">
+                {isDomestic(selectedStock.market) && <OrderBook stock={selectedStock}/>}
+                <div className="trade-side">
+                  <div className="trade-quick-box">
+                    <button className="quick-buy" onClick={()=>handleOpenTrade(selectedStock,"buy")}>매수</button>
+                    <button className="quick-sell" onClick={()=>handleOpenTrade(selectedStock,"sell")}>매도</button>
+                  </div>
+                  <div className="ai-box"><div className="ai-box-title">✦ AI 큐빅 분석</div><p className="ai-box-desc">{selectedStock.name}({selectedStock.symbol}) 분석 준비 중</p></div>
+                </div>
               </div>
-              <div className="ai-box"><div className="ai-box-title">✦ AI 큐빅 분석</div><p className="ai-box-desc">{selectedStock.name}({selectedStock.symbol}) 분석 준비 중</p></div>
             </>):(<>
               <div className="chart-box"><span className="chart-ico">📈</span><p>종목을 선택하면<br/>캔들차트가 표시됩니다</p></div>
               <div className="ai-box"><div className="ai-box-title">✦ AI 큐빅 분석</div><p className="ai-box-desc">AI 분석 데이터 연동 예정</p></div>
@@ -182,7 +212,7 @@ export default function MainDashboard({user}){
         </div>
       </div>
 
-      {tradeModalStock&&<TradeModal stock={tradeModalStock} onClose={()=>setTradeModalStock(null)} onSuccess={()=>{}}/>}
+      {tradeModalStock&&<TradeModal stock={tradeModalStock} initialMode={tradeMode} onClose={()=>setTradeModalStock(null)} onSuccess={()=>{}}/>}
     </div>
   );
 }
@@ -190,8 +220,8 @@ export default function MainDashboard({user}){
 function PanelShell({title,sub,children,theme=""}){return<div className={`panel-shell ${theme}`}><div className="panel-hd"><span className="panel-title">{title}</span>{sub&&<span className="panel-sub">{sub}</span>}</div><div className="panel-body">{children}</div></div>;}
 function EmptyMsg({icon,title,desc}){return<div className="panel-empty"><span className="panel-empty-ico">{icon}</span><p className="panel-empty-title">{title}</p><p className="panel-empty-desc">{desc}</p></div>;}
 function WatchlistPanel({watchlist=[],onSelect,onRemove}){
-  return<PanelShell title="관심종목" sub={`${watchlist.length}개 종목`} theme="theme-rose">{!watchlist.length?<EmptyMsg icon="♡" title="관심 종목이 없어요" desc={"종목 옆 ☆ 버튼을 눌러\n관심종목을 추가해 보세요."}/>:<div className="panel-list">{watchlist.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):s.symbol}</small></div><div style={{display:"flex",alignItems:"center",gap:6}}><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span><button onClick={e=>{e.stopPropagation();onRemove?.(s)}} style={{fontSize:14,border:"none",background:"none",color:"#e11d48",cursor:"pointer"}}>★</button></div></div>)}</div>}</PanelShell>;
+  return<PanelShell title="관심종목" sub={`${watchlist.length}개 종목`} theme="theme-rose">{!watchlist.length?<EmptyMsg icon="♡" title="관심 종목이 없어요" desc={"종목 옆 ☆ 버튼을 눌러\n관심종목을 추가해 보세요."}/>:<div className="panel-list">{watchlist.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):s.symbol}</small></div><div style={{display:"flex",alignItems:"center",gap:6}}><span className={isUp(s.changePercent)?"up":"down"}>{s.changePercent?fmtChange(s.changePercent):""}</span><button onClick={e=>{e.stopPropagation();onRemove?.(s)}} style={{fontSize:14,border:"none",background:"none",color:"#e11d48",cursor:"pointer"}}>★</button></div></div>)}</div>}</PanelShell>;
 }
 function AiPanel(){return<PanelShell title="✦ AI 큐빅 분석" sub="3D 큐빅 모델 실시간 신호" theme="theme-violet"><EmptyMsg icon="✦" title="AI 분석 연동 예정" desc={"백엔드 연동 후\n실시간 신호가 표시됩니다."}/></PanelShell>;}
-function RecentPanel({stocks=[],onSelect}){return<PanelShell title="최근 본 종목" sub="오늘 조회한 종목" theme="theme-amber">{!stocks.length?<EmptyMsg icon="🕐" title="최근 본 종목이 없어요" desc={"종목을 클릭하면\n여기에 기록됩니다."}/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.symbol}</small></div><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span></div>)}</div>}</PanelShell>;}
-function RealtimePanel({stocks=[],connected}){return<PanelShell title={<>실시간 체결 {connected&&<span style={{color:"#22c55e",fontSize:10}}>● LIVE</span>}</>} sub="주요 종목 현황" theme="theme-cyan">{!stocks.length?<EmptyMsg icon="⚡" title="데이터 로딩 중" desc="잠시만 기다려주세요."/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item"><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):"-"}</small></div><span className={Number(s.changePercent)>=0?"up":"down"}>{s.changePercent?`${Number(s.changePercent)>=0?"+":""}${s.changePercent}%`:""}</span></div>)}</div>}</PanelShell>;}
+function RecentPanel({stocks=[],onSelect}){return<PanelShell title="최근 본 종목" sub="오늘 조회한 종목" theme="theme-amber">{!stocks.length?<EmptyMsg icon="🕐" title="최근 본 종목이 없어요" desc={"종목을 클릭하면\n여기에 기록됩니다."}/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item" onClick={()=>onSelect?.(s)}><div><strong>{s.name}</strong><small>{s.symbol}</small></div><span className={isUp(s.changePercent)?"up":"down"}>{s.changePercent?fmtChange(s.changePercent):""}</span></div>)}</div>}</PanelShell>;}
+function RealtimePanel({stocks=[],connected}){return<PanelShell title={<>실시간 체결 {connected&&<span style={{color:"#22c55e",fontSize:10}}>● LIVE</span>}</>} sub="주요 종목 현황" theme="theme-cyan">{!stocks.length?<EmptyMsg icon="⚡" title="데이터 로딩 중" desc="잠시만 기다려주세요."/>:<div className="panel-list">{stocks.map(s=><div key={s.symbol} className="panel-stock-item"><div><strong>{s.name}</strong><small>{s.price?(isDomestic(s.market)?`${fmt(s.price)}원`:`$${s.price}`):"-"}</small></div><span className={isUp(s.changePercent)?"up":"down"}>{s.changePercent?fmtChange(s.changePercent):""}</span></div>)}</div>}</PanelShell>;}

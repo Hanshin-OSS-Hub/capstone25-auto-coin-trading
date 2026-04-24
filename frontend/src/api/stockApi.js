@@ -134,6 +134,14 @@ export const getExchangeCode = (market) => ({ NASDAQ: "NAS", NYSE: "NYS", AMEX: 
 export const isDomestic = (market) => ["KOSPI", "KOSDAQ", "ETF"].includes(market);
 export const fmt = (n) => { const num = Number(n); return isNaN(num) ? n : num.toLocaleString("ko-KR"); };
 export const fmtPrice = (price, market) => !price ? "-" : isDomestic(market) ? `${fmt(price)}원` : `$${Number(price).toFixed(2)}`;
+// 변동률 포맷: "+0.55" → "+0.55%", "-2.23" → "-2.23%"  (중복 부호 방지)
+export const fmtChange = (cp) => {
+  if (!cp && cp !== 0) return "-";
+  const n = Number(String(cp).replace(/[+]/g, ""));
+  if (isNaN(n)) return "-";
+  return `${n >= 0 ? "+" : ""}${n}%`;
+};
+export const isUp = (cp) => Number(String(cp).replace(/[+]/g, "")) >= 0;
 
 export const DOMESTIC_STOCKS = [
   { symbol: "005930", name: "삼성전자", market: "KOSPI" },

@@ -34,11 +34,19 @@
 .search-inline input::placeholder{color:var(--c-text-muted);}
 
 .cat-area{padding:12px 18px;border-bottom:1px solid var(--c-border-light);display:flex;flex-direction:column;gap:8px;}
+.filter-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .chip-row{display:flex;flex-wrap:wrap;gap:5px;}
+.sort-row{display:flex;gap:4px;}
 .chip{padding:5px 13px;border-radius:20px;border:1px solid var(--c-border);background:var(--c-hover);font-size:12px;font-weight:500;color:var(--c-text-sub);cursor:pointer;transition:all 0.12s;}
 .chip:hover{background:var(--c-primary-muted);border-color:var(--c-primary-border);color:var(--c-primary-deep);}
 .chip.active{background:#14b8a6;color:#fff;border-color:#14b8a6;font-weight:700;box-shadow:0 1px 4px rgba(20,184,166,0.3);}
 [data-theme="dark"] .chip.active{background:rgba(45,212,191,0.15);color:#5eead4;border-color:rgba(94,234,212,0.3);}
+
+/* 정렬 칩 */
+.sort-chip{padding:5px 12px;border-radius:var(--r-sm);border:1px solid var(--c-border);background:var(--c-surface);font-size:12px;font-weight:500;color:var(--c-text-sub);cursor:pointer;transition:all 0.12s;font-family:inherit;white-space:nowrap;}
+.sort-chip:hover{background:var(--c-hover);color:var(--c-text);}
+.sort-chip.active{background:var(--c-text);color:var(--c-surface);border-color:var(--c-text);font-weight:700;}
+[data-theme="dark"] .sort-chip.active{background:#e5e7eb;color:#111827;}
 
 .tbl-head{display:grid;grid-template-columns:2.5fr 1fr 1fr 0.8fr;padding:8px 18px;background:var(--c-hover);border-bottom:1px solid var(--c-border-light);}
 .tbl-head span{font-size:11px;color:var(--c-text-muted);font-weight:600;text-align:right;}
@@ -80,11 +88,17 @@
 @keyframes spin{to{transform:rotate(360deg)}}
 .retry-btn{margin-top:8px;padding:6px 16px;background:#14b8a6;color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;}.retry-btn:hover{background:#0d9488;}
 
-.chart-aside{width:420px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;transition:opacity 0.2s;}
+.chart-aside{width:420px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;transition:width 0.3s ease;}
+.chart-aside.expanded{width:55%;min-width:520px;}
 .chart-aside.hidden{display:none;}
+
+.chart-detail-row{display:flex;gap:12px;align-items:flex-start;}
+.chart-detail-row .orderbook-wrap{flex:1;min-width:0;}
+.trade-side{width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;}
 .chart-box{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 20px;gap:12px;color:var(--c-text-muted);box-shadow:var(--shadow-sm);transition:background 0.3s,border-color 0.3s;}
 .chart-ico{font-size:32px;opacity:0.6;}.chart-box p{font-size:12.5px;text-align:center;line-height:1.7;}
 .trade-quick-box{display:flex;gap:8px;}
+.trade-side .trade-quick-box{flex-direction:column;}
 .quick-buy,.quick-sell{flex:1;padding:12px;border:none;border-radius:var(--r-md);font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:all 0.15s;font-family:inherit;}
 .quick-buy{background:#ef4444;}.quick-buy:hover{background:#dc2626;}
 .quick-sell{background:#3b82f6;}.quick-sell:hover{background:#2563eb;}
@@ -153,6 +167,6 @@
 .darkmode-toggle:hover .dm-icon{transform:rotate(15deg);}
 .darkmode-toggle span{font-size:11px;font-weight:600;white-space:nowrap;}
 
-@media(max-width:1100px){.chart-aside{width:360px;}}
-@media(max-width:900px){.content-row{flex-direction:column;}.chart-aside{width:100%;}}
+@media(max-width:1100px){.chart-aside{width:360px;}.chart-aside.expanded{width:50%;min-width:400px;}.trade-side{width:160px;}}
+@media(max-width:900px){.content-row{flex-direction:column;}.chart-aside{width:100%;}.chart-aside.expanded{width:100%;min-width:0;}.chart-detail-row{flex-direction:column;}.trade-side{width:100%;}}
 @media(max-width:600px){.main-area{padding:10px;}.slide-panel.open{width:220px;}.panel-shell{width:220px;}.icon-col{width:56px;}.icon-btn{width:44px;}.icon-btn span{font-size:9.5px;}.search-inline input{width:100px;}}
