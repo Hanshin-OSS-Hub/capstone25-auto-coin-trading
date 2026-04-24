@@ -11,7 +11,7 @@ const api = axios.create({
 
 // JWT 토큰 자동 첨부
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("cubic_token");
+  const token = sessionStorage.getItem("cubic_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -25,13 +25,13 @@ export const signUp = async (email, password, name) => {
 export const login = async (email, password) => {
   const res = await api.post("/api/users/login", { email, password });
   // { token, name } — 토큰 자동 저장
-  if (res.data?.token) localStorage.setItem("cubic_token", res.data.token);
+  if (res.data?.token) sessionStorage.setItem("cubic_token", res.data.token);
   return res.data;
 };
 
 export const logout = () => {
-  localStorage.removeItem("cubic_token");
-  localStorage.removeItem("cubic_user");
+  sessionStorage.removeItem("cubic_token");
+  sessionStorage.removeItem("cubic_user");
 };
 
 export const getMyInfo = async () => {

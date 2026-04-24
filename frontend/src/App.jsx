@@ -13,7 +13,7 @@ export default function App() {
 
   // JWT 토큰이 있으면 서버에서 내 정보 확인
   useEffect(() => {
-    const token = localStorage.getItem("cubic_token");
+    const token = sessionStorage.getItem("cubic_token");
     if (!token) {
       setChecking(false);
       return;
@@ -22,11 +22,11 @@ export default function App() {
       try {
         const me = await getMyInfo();
         setUser(me);
-        localStorage.setItem("cubic_user", JSON.stringify(me));
+        sessionStorage.setItem("cubic_user", JSON.stringify(me));
       } catch {
         // 토큰 만료 → 로컬 백업 시도
         try {
-          const saved = localStorage.getItem("cubic_user");
+          const saved = sessionStorage.getItem("cubic_user");
           if (saved) setUser(JSON.parse(saved));
         } catch {}
       } finally {
@@ -37,7 +37,7 @@ export default function App() {
 
   const handleLogin = (userInfo) => {
     setUser(userInfo);
-    localStorage.setItem("cubic_user", JSON.stringify(userInfo));
+    sessionStorage.setItem("cubic_user", JSON.stringify(userInfo));
   };
 
   const handleLogout = () => {
