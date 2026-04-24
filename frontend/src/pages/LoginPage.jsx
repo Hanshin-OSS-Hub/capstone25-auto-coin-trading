@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signUp, login } from "../api/stockApi";
+import { signUp, login, getMyInfo } from "../api/stockApi";
 import "./LoginPage.css";
 
 export default function LoginPage({ onLogin }) {
@@ -12,8 +12,8 @@ export default function LoginPage({ onLogin }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    setForm(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
 
   const validate = () => {
@@ -29,15 +29,6 @@ export default function LoginPage({ onLogin }) {
     return ne;
   };
 
-  // "로그인 성공! 환영합니다, 홍길동" → "홍길동"
-  const parseName = (res) => {
-    if (typeof res === "string") {
-      const m = res.match(/환영합니다,?\s*(.+?)[\s!.]*$/);
-      if (m) return m[1].trim();
-    }
-    return null;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const ne = validate();
@@ -46,16 +37,19 @@ export default function LoginPage({ onLogin }) {
     try {
       if (mode === "signup") {
         await signUp(form.email, form.password, form.name);
-        console.log("✅ 회원가입 성공");
-        const loginRes = await login(form.email, form.password);
-        console.log("✅ 자동 로그인:", loginRes);
-        onLogin({ email: form.email, name: form.name });
-      } else {
-        const loginRes = await login(form.email, form.password);
-        console.log("✅ 로그인 응답:", loginRes);
-        const name = parseName(loginRes) || form.email.split("@")[0];
-        onLogin({ email: form.email, name });
       }
+      // 로그인 → { token, name }
+      const loginRes = await login(form.email, form.password);
+      console.log("✅ 로그인 성공:", loginRes);
+
+      // 토큰으로 내 정보 가져오기
+      let userInfo = { email: form.email, name: loginRes.name || form.name || form.email.split("@")[0] };
+      try {
+        const me = await getMyInfo();
+        userInfo = me;
+      } catch {}
+
+      onLogin(userInfo);
       navigate("/");
     } catch (err) {
       console.error("❌ 인증 에러:", err.response?.status, err.response?.data);
@@ -97,10 +91,10 @@ export default function LoginPage({ onLogin }) {
             <p>{mode==="login"?"계속하려면 로그인해 주세요.":"계정을 만들고 AI 투자를 시작하세요."}</p>
           </div>
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {mode==="signup"&&(<div className="form-group"><label>이름</label><input name="name" type="text" placeholder="홍길동" value={form.name} onChange={handleChange} className={errors.name?"error":""}/>{errors.name&&<span className="error-msg">{errors.name}</span>}</div>)}
+            {mode==="signup"&&<div className="form-group"><label>이름</label><input name="name" type="text" placeholder="홍길동" value={form.name} onChange={handleChange} className={errors.name?"error":""}/>{errors.name&&<span className="error-msg">{errors.name}</span>}</div>}
             <div className="form-group"><label>이메일</label><input name="email" type="email" placeholder="example@email.com" value={form.email} onChange={handleChange} className={errors.email?"error":""}/>{errors.email&&<span className="error-msg">{errors.email}</span>}</div>
             <div className="form-group"><label>비밀번호</label><input name="password" type="password" placeholder="비밀번호 입력" value={form.password} onChange={handleChange} className={errors.password?"error":""}/>{errors.password&&<span className="error-msg">{errors.password}</span>}</div>
-            {mode==="signup"&&(<div className="form-group"><label>비밀번호 확인</label><input name="confirmPassword" type="password" placeholder="비밀번호를 한 번 더 입력해 주세요" value={form.confirmPassword} onChange={handleChange} className={errors.confirmPassword?"error":""}/>{errors.confirmPassword&&<span className="error-msg">{errors.confirmPassword}</span>}</div>)}
+            {mode==="signup"&&<div className="form-group"><label>비밀번호 확인</label><input name="confirmPassword" type="password" placeholder="비밀번호를 한 번 더 입력해 주세요" value={form.confirmPassword} onChange={handleChange} className={errors.confirmPassword?"error":""}/>{errors.confirmPassword&&<span className="error-msg">{errors.confirmPassword}</span>}</div>}
             <button type="submit" className="submit-btn" disabled={loading}>{loading?<span className="spinner"/>:mode==="login"?"로그인":"가입하기"}</button>
           </form>
           <p className="switch-hint">{mode==="login"?<>계정이 없으신가요? <button onClick={()=>switchMode("signup")}>회원가입</button></>:<>이미 계정이 있으신가요? <button onClick={()=>switchMode("login")}>로그인</button></>}</p>

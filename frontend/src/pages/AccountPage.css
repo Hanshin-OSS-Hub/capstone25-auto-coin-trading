@@ -213,6 +213,59 @@
 .acc-empty p { font-size: 14px; font-weight: 700; color: var(--c-text); }
 .acc-empty small { font-size: 12px; color: var(--c-text-muted); }
 
+/* 환전 섹션 */
+.exchange-section {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  transition: background 0.3s, border-color 0.3s;
+}
+.exchange-rate-display { font-size: 13px; color: var(--c-text-sub); margin-bottom: 12px; }
+.exchange-rate-display strong { color: var(--c-text); font-weight: 700; }
+.exchange-btns { display: flex; gap: 8px; margin-bottom: 10px; }
+.ex-btn {
+  padding: 7px 16px; border: 1px solid var(--c-border); border-radius: var(--r-sm);
+  background: var(--c-surface); font-size: 13px; font-weight: 600;
+  color: var(--c-text-sub); cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.ex-btn:hover { background: var(--c-hover); }
+.ex-btn.active { background: #14b8a6; color: #fff; border-color: #14b8a6; }
+.exchange-form { display: flex; gap: 8px; margin-top: 8px; }
+.exchange-form input {
+  flex: 1; padding: 9px 12px; border: 1px solid var(--c-border); border-radius: var(--r-sm);
+  font-size: 14px; color: var(--c-text); background: var(--c-surface); outline: none; font-family: inherit;
+}
+.exchange-form input:focus { border-color: #14b8a6; }
+.exchange-form button {
+  padding: 9px 20px; background: #14b8a6; color: #fff; border: none;
+  border-radius: var(--r-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.exchange-form button:hover { background: #0d9488; }
+.exchange-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+.ex-msg { margin-top: 8px; padding: 8px 12px; border-radius: var(--r-sm); font-size: 12px; font-weight: 600; text-align: center; }
+.ex-msg.success { background: rgba(20,184,166,0.1); color: #0f766e; }
+.ex-msg.error { background: rgba(239,68,68,0.1); color: #dc2626; }
+
+/* 실현손익 탭 */
+.profit-period-tabs { display: flex; gap: 4px; padding: 12px 18px; border-bottom: 1px solid var(--c-border-light); }
+.period-chip {
+  padding: 5px 12px; border-radius: var(--r-sm); border: 1px solid var(--c-border);
+  background: var(--c-surface); font-size: 12px; font-weight: 500; color: var(--c-text-sub);
+  cursor: pointer; transition: all 0.12s; font-family: inherit;
+}
+.period-chip:hover { background: var(--c-primary-muted); }
+.period-chip.active { background: #14b8a6; color: #fff; border-color: #14b8a6; }
+.profit-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 18px; border-bottom: 1px solid var(--c-border-light);
+  font-size: 14px; color: var(--c-text-sub);
+}
+.profit-total strong { font-size: 18px; font-weight: 800; }
+.profit-total strong.up { color: #ef4444; }
+.profit-total strong.down { color: #3b82f6; }
+
 @media (max-width: 768px) {
   .asset-summary { grid-template-columns: 1fr; }
   .holdings-grid-v2 { grid-template-columns: 2fr 1fr 1fr 1fr; }
